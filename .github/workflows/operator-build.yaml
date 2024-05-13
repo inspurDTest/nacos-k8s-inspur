@@ -6,6 +6,10 @@
 name: Publish Docker image
 
 on:
+  pull_request:
+    branches:
+    - "*"
+
   push:
     branches:
     - "*"
