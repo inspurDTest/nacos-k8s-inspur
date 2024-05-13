@@ -9,10 +9,12 @@ on:
   pull_request:
     branches:
     - "heads*"
+    - "*"
 
   push:
     branches:
     - "heads*"
+    - "*"
 
 jobs:
   push_to_registry:
