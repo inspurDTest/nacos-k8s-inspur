@@ -23,10 +23,10 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GO111MODULE=on go build  -a -v -o mana
 
 # Use distroless as minimal base image to package the manager binary
 # Refer to https://github.com/GoogleContainerTools/distroless for more details
-FROM registry.cn-hangzhou.aliyuncs.com/shenkonghui/distroless-static:nonroot
+FROM gcr.io/distroless/java17-debian12:debug
 WORKDIR /
 COPY --from=builder /workspace/manager .
 COPY --from=builder /workspace/config/sql/nacos-mysql.sql config/sql/nacos-mysql.sql
-USER nonroot:nonroot
+USER root:root
 
 ENTRYPOINT ["/manager"]
