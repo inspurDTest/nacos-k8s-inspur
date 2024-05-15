@@ -30,7 +30,7 @@ type ServersInfo struct {
 						Leader          string   `json:"leader"`
 						RaftGroupMember []string `json:"raftGroupMember"`
 						Term            int      `json:"term"`
-					} `json:"naming_persistent_service"`
+					} `json:"naming_persistent_service_v2"`
 				} `json:"metaDataMap"`
 			} `json:"raftMetaData"`
 			RaftPort string `json:"raftPort"`
