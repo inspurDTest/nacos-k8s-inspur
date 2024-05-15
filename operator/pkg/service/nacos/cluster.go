@@ -47,10 +47,16 @@ func (c *NacosClient) GetClusterNodes(ip string) (ServersInfo, error) {
 	var resp *http.Response
 	var err error
 
-	if strings.Contains(ip, ":") {
+	/*if strings.Contains(ip, ":") {
 		resp, err = c.httpClient.Get(fmt.Sprintf("http://[%s]:8848/nacos/v1/ns/operator/servers", ip))
 	} else {
 		resp, err = c.httpClient.Get(fmt.Sprintf("http://%s:8848/nacos/v1/ns/operator/servers", ip))
+	}*/
+
+	if strings.Contains(ip, ":") {
+		resp, err = c.httpClient.Get(fmt.Sprintf("http://[%s]:8848/nacos/v2/core/cluster/node/list?state=UP", ip))
+	} else {
+		resp, err = c.httpClient.Get(fmt.Sprintf("http://%s:8848/nacos/v2/core/cluster/node/list?state=UP", ip))
 	}
 
 	if err != nil {
