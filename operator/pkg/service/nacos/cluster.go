@@ -17,6 +17,31 @@ type NacosClient struct {
 	httpClient http.Client
 }
 
+// V1
+/*type ServersInfo struct {
+	Servers []struct {
+		IP         string `json:"ip"`
+		Port       int    `json:"port"`
+		State      string `json:"state"`
+		ExtendInfo struct {
+			LastRefreshTime int64 `json:"lastRefreshTime"`
+			RaftMetaData    struct {
+				MetaDataMap struct {
+					NamingPersistentService struct {
+						Leader          string   `json:"leader"`
+						RaftGroupMember []string `json:"raftGroupMember"`
+						Term            int      `json:"term"`
+					} `json:"naming_persistent_service"`
+				} `json:"metaDataMap"`
+			} `json:"raftMetaData"`
+			RaftPort string `json:"raftPort"`
+			Version  string `json:"version"`
+		} `json:"extendInfo"`
+		Address       string `json:"address"`
+		FailAccessCnt int    `json:"failAccessCnt"`
+	} `json:"servers"`
+}
+*/
 type ServersInfo struct {
 	Servers []struct {
 		IP         string `json:"ip"`
@@ -38,7 +63,7 @@ type ServersInfo struct {
 		} `json:"extendInfo"`
 		Address       string `json:"address"`
 		FailAccessCnt int    `json:"failAccessCnt"`
-	} `json:"servers"`
+	} `json:"data"`
 }
 
 func (c *NacosClient) GetClusterNodes(ip string) (ServersInfo, error) {
