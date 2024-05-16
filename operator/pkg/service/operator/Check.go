@@ -56,6 +56,13 @@ func (c *CheckClient) CheckNacos(nacos *nacosgroupv1alpha1.Nacos, pods []corev1.
 	for _, pod := range pods {
 		servers, err := c.nacosClient.GetClusterNodes(pod.Status.PodIP)
 		myErrors.EnsureNormalMyError(err, myErrors.CODE_CLUSTER_FAILE)
+		
+                c.logger.V(0).Info("cr中实例个数和server数量对比",
+			"podName", pod.Name,
+			"server size",len(servers.Servers),
+			"nacosSpecReplicas", int(*nacos.Spec.Replicas),
+			)
+
 		// 确保cr中实例个数和server数量相同
 		myErrors.EnsureEqual(len(servers.Servers), int(*nacos.Spec.Replicas), myErrors.CODE_CLUSTER_FAILE, "server num is not equal")
 		for _, svc := range servers.Servers {
