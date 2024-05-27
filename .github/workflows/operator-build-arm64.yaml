@@ -36,6 +36,6 @@ jobs:
           context: operator
           file: operator/Dockerfile-arm64
           push: true
-          tags: inspurwyd/nacos-operator:v1.4.1-dbug
+          tags: inspurwyd/nacos-operator:v1.4.1-dbug-arm64
           labels: inspurwyd
           
