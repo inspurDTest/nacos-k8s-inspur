@@ -25,7 +25,7 @@ jobs:
 
       - name: Login to Docker
         run: |
-           docker login -u inspurwyd  -p  dckr_pat_yMRt21vCZj0PlDl14xJiqSOHeVg
+            docker login --username=${{ secrets.USERNAME_ALI }} registry.cn-hangzhou.aliyuncs.com -p ${{ secrets.PASSWORD_ALI }}
 
 
       - name: Build and push Docker image
@@ -34,6 +34,6 @@ jobs:
           context: operator
           file: operator/Dockerfile-arm64
           push: true
-          tags: inspurwyd/nacos-operator:v1.0.0-dbug-arm64
+          tags: registry.cn-hangzhou.aliyuncs.com/nacos-wyd/nacos-operator:v1.0.0-dbug-arm64
           labels: inspurwyd
           
