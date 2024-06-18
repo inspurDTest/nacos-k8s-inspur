@@ -80,10 +80,12 @@ func (s *StatefulSetService) GetStatefulSetReadPod(namespace, name string) ([]co
 		if len(pod.Status.Conditions) < 4 {
 			continue
 		}
-		if pod.Status.Conditions[1].Type == "Ready" &&
-			pod.Status.Conditions[1].Status == "True" {
-			num = num + 1
-			podlist = append(podlist, pod)
+		for _, condition := range pod.Status.Conditions {
+			if pod.Status.Conditions[1].Type == "Ready" &&
+				pod.Status.Conditions[1].Status == "True" {
+				num = num + 1
+				podlist = append(podlist, pod)
+			}
 		}
 	}
 	return podlist, nil
