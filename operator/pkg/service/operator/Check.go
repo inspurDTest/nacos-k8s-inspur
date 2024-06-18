@@ -41,6 +41,10 @@ func (c *CheckClient) CheckKind(nacos *nacosgroupv1alpha1.Nacos) []corev1.Pod {
 
 	// 检查正常的pod数量，根据实际情况。如果单实例，必须要有1个;集群要1/2以上
 	pods, err := c.k8sService.GetStatefulSetReadPod(nacos.Namespace, nacos.Name)
+	c.logger.V(0).Info("pods信息",
+		"pods长度", len(pods),
+		"期望pod副本的一半",(int(*nacos.Spec.Replicas)+1)/2,
+	)
 	if len(pods) < (int(*nacos.Spec.Replicas)+1)/2 {
 		panic(myErrors.New(myErrors.CODE_ERR_UNKNOW, "The number of ready pods is too less"))
 	} else if len(pods) != int(*nacos.Spec.Replicas) {
