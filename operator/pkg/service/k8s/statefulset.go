@@ -73,6 +73,10 @@ func (s *StatefulSetService) GetStatefulSetReadPod(namespace, name string) ([]co
 	}
 	num := 0
 	for _, pod := range podList.Items {
+		s.logger.V(0).Info("pod信息",
+			"podName", pod.Name,
+			"pod 状态Conditions长度",len(pod.Status.Conditions),
+		)
 		if len(pod.Status.Conditions) < 4 {
 			continue
 		}
