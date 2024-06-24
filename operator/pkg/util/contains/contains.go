@@ -46,5 +46,5 @@ func RemoveString(slice []string, str string) (result []string) {
 		}
 		result = append(result, item)
 	}
-
+	return result
 }
