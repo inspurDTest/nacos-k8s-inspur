@@ -1,6 +1,8 @@
 apiVersion: nacos.io/v1alpha1
 kind: Nacos
 metadata:
+  finalizers:
+    - cleanUpNacosPvc
   name: {{ include "nacos.fullname" . }}
 spec:
   # standalone/cluster

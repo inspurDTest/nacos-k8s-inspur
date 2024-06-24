@@ -88,6 +88,7 @@ func (r *NacosReconciler) ReconcileWork(instance *nacosgroupv1alpha1.Nacos) bool
 	}()
 
 	for _, fun := range []reconcileFun{
+		r.OperaterClient.HandlerFinalizers,
 		r.OperaterClient.PreCheck,
 		// 保证资源能够创建
 		r.OperaterClient.MakeEnsure,

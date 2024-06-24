@@ -1,12 +1,16 @@
 package operator
 
 import (
+	"context"
 	log "github.com/go-logr/logr"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes"
 	nacosgroupv1alpha1 "nacos.io/nacos-operator/api/v1alpha1"
 	myErrors "nacos.io/nacos-operator/pkg/errors"
 	"nacos.io/nacos-operator/pkg/service/k8s"
+	"nacos.io/nacos-operator/pkg/util/contains"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -15,6 +19,7 @@ type IOperatorClient interface {
 	ICheckClient
 	IHealClient
 	IStatusClient
+	IUpdateClient
 }
 
 type OperatorClient struct {
@@ -22,6 +27,7 @@ type OperatorClient struct {
 	CheckClient  *CheckClient
 	HealClient   *HealClient
 	StatusClient *StatusClient
+	UpdateClient *UpdateClient
 }
 
 func NewOperatorClient(logger log.Logger, clientset *kubernetes.Clientset, s *runtime.Scheme, client client.Client) *OperatorClient {
@@ -35,6 +41,8 @@ func NewOperatorClient(logger log.Logger, clientset *kubernetes.Clientset, s *ru
 		StatusClient: NewStatusClient(logger, service, client),
 		// 维护客户端
 		HealClient: NewHealClient(logger, service),
+		// 更新非状态客户端
+		UpdateClient: NewUpdateClient(logger, service, client),
 	}
 }
 
@@ -64,6 +72,59 @@ func (c *OperatorClient) MakeEnsure(nacos *nacosgroupv1alpha1.Nacos) {
 		panic(myErrors.New(myErrors.CODE_PARAMETER_ERROR, myErrors.MSG_PARAMETER_ERROT, "nacos.Spec.Type", nacos.Spec.Type))
 	}
 }
+
+func (c *OperatorClient) HandlerFinalizers(nacos *nacosgroupv1alpha1.Nacos) {
+	finalizer := "cleanUpNacosPvc"
+	if nacos.Spec.Database.TypeDatabase != "embedded" {
+		return
+	}
+	if nacos.DeletionTimestamp.IsZero(){
+		if !contains.ContainString(nacos.ObjectMeta.Finalizers,finalizer){
+			nacos.ObjectMeta.Finalizers = append(nacos.ObjectMeta.Finalizers,finalizer)
+		   c.UpdateClient.Update(nacos)
+		}
+	} else {
+		if contains.ContainString(nacos.ObjectMeta.Finalizers,finalizer){
+			c.CleanAllPvcs(nacos)
+			nacos.ObjectMeta.Finalizers = contains.RemoveString(nacos.ObjectMeta.Finalizers, finalizer)
+			c.UpdateClient.Update(nacos)
+		}
+	}
+}
+func (c *OperatorClient) getPvcList(nacos *nacosgroupv1alpha1.Nacos)(Pvcs corev1.PersistentVolumeClaimList, err error) {
+	selector, err := metav1.LabelSelectorAsSelector(&metav1.LabelSelector{
+		MatchLabels: map[string]string{"app": nacos.GetName(),"component": "nacos"},
+	})
+	pvcListOps := &client.ListOptions{
+		Namespace: nacos.Namespace,
+		LabelSelector: selector,
+	}
+	pvcList := &corev1.PersistentVolumeClaimList{}
+	err = c.UpdateClient.client.List(context.TODO(),pvcList,pvcListOps)
+	return *pvcList, err
+}
+func (c *OperatorClient) deletePvc(pvcItem corev1.PersistentVolumeClaim)error{
+	pvcDelete := &corev1.PersistentVolumeClaim{
+		ObjectMeta : metav1.ObjectMeta{
+			Name: pvcItem.Name,
+			Namespace: pvcItem.Namespace,
+		},
+	}
+	if err := c.UpdateClient.client.Delete(context.TODO(), pvcDelete);err != nil{
+		c.UpdateClient.logger.V(0).Error(err,"delete pvc error")
+	}
+}
+
+func (c *OperatorClient) CleanAllPvcs(nacos *nacosgroupv1alpha1.Nacos) {
+	pvcs, err := c.getPvcList(nacos)
+	if err != nil {
+		myErrors.EnsureNormalMyError(err, myErrors.CODE_CLUSTER_FAILE)
+	}
+	for _, pvcItem := range pvcs.Items {
+		c.deletePvc(pvcItem)
+	}
+}
+
 
 func (c *OperatorClient) PreCheck(nacos *nacosgroupv1alpha1.Nacos) {
 	switch nacos.Status.Phase {
