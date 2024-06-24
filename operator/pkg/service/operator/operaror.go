@@ -117,6 +117,7 @@ func (c *OperatorClient) deletePvc(pvcItem corev1.PersistentVolumeClaim){
 
 func (c *OperatorClient) CleanAllPvcs(nacos *nacosgroupv1alpha1.Nacos) {
 	pvcs, err := c.getPvcList(nacos)
+	c.UpdateClient.logger.V(0).Info("get pvc ","pvs",pvcs)
 	if err != nil {
 		myErrors.EnsureNormalMyError(err, myErrors.CODE_CLUSTER_FAILE)
 	}
