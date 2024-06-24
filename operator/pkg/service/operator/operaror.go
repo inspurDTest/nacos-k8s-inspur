@@ -103,7 +103,7 @@ func (c *OperatorClient) getPvcList(nacos *nacosgroupv1alpha1.Nacos)(Pvcs corev1
 	err = c.UpdateClient.client.List(context.TODO(),pvcList,pvcListOps)
 	return *pvcList, err
 }
-func (c *OperatorClient) deletePvc(pvcItem corev1.PersistentVolumeClaim)error{
+func (c *OperatorClient) deletePvc(pvcItem corev1.PersistentVolumeClaim){
 	pvcDelete := &corev1.PersistentVolumeClaim{
 		ObjectMeta : metav1.ObjectMeta{
 			Name: pvcItem.Name,
