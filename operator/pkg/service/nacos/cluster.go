@@ -79,7 +79,7 @@ func (c *NacosClient) GetClusterNodes(ip string) (ServersInfo, error) {
 	} else {
 		resp, err = c.httpClient.Get(fmt.Sprintf("http://%s:8848/nacos", ip))
 	}
-    if !strings.EqualFold( resp.Status, "200") {
+	if !strings.Contains(resp.Status,"200"){
 		return servers, err
 	}
 
