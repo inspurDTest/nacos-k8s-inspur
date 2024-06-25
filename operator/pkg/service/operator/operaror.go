@@ -78,13 +78,13 @@ func (c *OperatorClient) HandlerFinalizers(nacos *nacosgroupv1alpha1.Nacos) {
 	if nacos.Spec.Database.TypeDatabase != "embedded" {
 		return
 	}
-	if nacos.DeletionTimestamp.IsZero(){
+	if nacos.DeletionTimestamp.IsZero() {
 		if !contains.ContainString(nacos.ObjectMeta.Finalizers,finalizer){
 			nacos.ObjectMeta.Finalizers = append(nacos.ObjectMeta.Finalizers,finalizer)
 		   c.UpdateClient.Update(nacos)
 		}
 	} else {
-		if contains.ContainString(nacos.ObjectMeta.Finalizers,finalizer){
+		if contains.ContainString(nacos.ObjectMeta.Finalizers,finalizer) {
 			c.CleanAllPvcs(nacos)
 			nacos.ObjectMeta.Finalizers = contains.RemoveString(nacos.ObjectMeta.Finalizers, finalizer)
 			c.UpdateClient.Update(nacos)

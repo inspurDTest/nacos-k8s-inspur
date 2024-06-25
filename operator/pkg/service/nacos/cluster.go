@@ -75,12 +75,15 @@ func (c *NacosClient) GetClusterNodes(ip string) (ServersInfo, error) {
 
 	// 检查每个pod控制台是否可用
 	if strings.Contains(ip, ":") {
-		resp, err = c.httpClient.Get(fmt.Sprintf("http://[%s]:8848/nacos", ip))
+		resp, err = c.httpClient.Get(fmt.Sprintf("http://[%s]:8848/nacos/", ip))
 	} else {
-		resp, err = c.httpClient.Get(fmt.Sprintf("http://%s:8848/nacos", ip))
+		resp, err = c.httpClient.Get(fmt.Sprintf("http://%s:8848/nacos/", ip))
 	}
 	if !strings.Contains(resp.Status,"200"){
-		return servers, err
+		if !strings.EqualFold(err.Error(),""){
+			return servers, err
+    	}
+		return servers, nil
 	}
 
 	// 检查每个pod的状态
