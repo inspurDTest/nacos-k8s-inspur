@@ -71,13 +71,19 @@ func (c *NacosClient) GetClusterNodes(ip string) (ServersInfo, error) {
 	//增加支持ipV6 pod状态探测
 	var resp *http.Response
 	var err error
+	defer resp.Body.Close()
 
-	/*if strings.Contains(ip, ":") {
-		resp, err = c.httpClient.Get(fmt.Sprintf("http://[%s]:8848/nacos/v1/ns/operator/servers", ip))
+	// 检查每个pod控制台是否可用
+	if strings.Contains(ip, ":") {
+		resp, err = c.httpClient.Get(fmt.Sprintf("http://[%s]:8848/nacos", ip))
 	} else {
-		resp, err = c.httpClient.Get(fmt.Sprintf("http://%s:8848/nacos/v1/ns/operator/servers", ip))
-	}*/
+		resp, err = c.httpClient.Get(fmt.Sprintf("http://%s:8848/nacos", ip))
+	}
+    if !strings.EqualFold( resp.Status, "200") {
+		return servers, err
+	}
 
+	// 检查每个pod的状态
 	if strings.Contains(ip, ":") {
 		resp, err = c.httpClient.Get(fmt.Sprintf("http://[%s]:8848/nacos/v2/core/cluster/node/list?state=UP", ip))
 	} else {
@@ -87,7 +93,7 @@ func (c *NacosClient) GetClusterNodes(ip string) (ServersInfo, error) {
 	if err != nil {
 		return servers, err
 	}
-	defer resp.Body.Close()
+
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return servers, err
