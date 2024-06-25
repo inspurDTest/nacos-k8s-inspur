@@ -452,9 +452,15 @@ func (e *KindClient) buildClientService(nacos *nacosgroupv1alpha1.Nacos) *v1.Ser
 func (e *KindClient) buildStatefulset(nacos *nacosgroupv1alpha1.Nacos) *appv1.StatefulSet {
 	// 生成label
 	labels := e.generateLabels(nacos.Name, NACOS)
-	// 合并cr中原有的label
-	labels = e.MergeLabels(nacos.Labels, labels)
+	// 合并cr中原有的label,但remove掉 app.kubernetes.io/managed-by=Helm情况
+	for key, value := range nacos.Labels {
+		if key == "app.kubernetes.io/managed-by" && value == "Helm" {
+			continue
+		}
+		labels[key] = value
+	}
 
+	labels = e.MergeLabels(nacos.Labels, labels)
 	// 设置默认的环境变量
 	env := append(nacos.Spec.Env, v1.EnvVar{
 		Name:  "PREFER_HOST_MODE",
