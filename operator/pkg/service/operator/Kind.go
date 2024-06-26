@@ -459,8 +459,7 @@ func (e *KindClient) buildStatefulset(nacos *nacosgroupv1alpha1.Nacos) *appv1.St
 		}
 		labels[key] = value
 	}
-
-	labels = e.MergeLabels(nacos.Labels, labels)
+	
 	// 设置默认的环境变量
 	env := append(nacos.Spec.Env, v1.EnvVar{
 		Name:  "PREFER_HOST_MODE",
