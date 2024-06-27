@@ -50,23 +50,33 @@ func (c *OperatorClient) MakeEnsure(nacos *nacosgroupv1alpha1.Nacos) {
 	// 验证CR字段
 	c.KindClient.ValidationField(nacos)
 
+	nacoscp := nacos.DeepCopy()
+	labels := map[string]string{}
+	for key, value := range nacos.Labels {
+		if key == "app.kubernetes.io/managed-by" && value == "Helm" {
+			continue
+		}
+		labels[key] = value
+	}
+	nacoscp.Annotations =  labels
+
 	switch nacos.Spec.Type {
 	case TYPE_STAND_ALONE:
-		c.KindClient.EnsureConfigmap(nacos)
-		c.KindClient.EnsureStatefulset(nacos)
-		c.KindClient.EnsureService(nacos)
+		c.KindClient.EnsureConfigmap(nacoscp)
+		c.KindClient.EnsureStatefulset(nacoscp)
+		c.KindClient.EnsureService(nacoscp)
 		if nacos.Spec.Database.TypeDatabase == "mysql" && nacos.Spec.MysqlInitImage != "" {
-			c.KindClient.EnsureMysqlConfigMap(nacos)
-			c.KindClient.EnsureJob(nacos)
+			c.KindClient.EnsureMysqlConfigMap(nacoscp)
+			c.KindClient.EnsureJob(nacoscp)
 		}
 	case TYPE_CLUSTER:
-		c.KindClient.EnsureConfigmap(nacos)
-		c.KindClient.EnsureStatefulsetCluster(nacos)
-		c.KindClient.EnsureHeadlessServiceCluster(nacos)
-		c.KindClient.EnsureClientService(nacos)
+		c.KindClient.EnsureConfigmap(nacoscp)
+		c.KindClient.EnsureStatefulsetCluster(nacoscp)
+		c.KindClient.EnsureHeadlessServiceCluster(nacoscp)
+		c.KindClient.EnsureClientService(nacoscp)
 		if nacos.Spec.Database.TypeDatabase == "mysql" && nacos.Spec.MysqlInitImage != "" {
-			c.KindClient.EnsureMysqlConfigMap(nacos)
-			c.KindClient.EnsureJob(nacos)
+			c.KindClient.EnsureMysqlConfigMap(nacoscp)
+			c.KindClient.EnsureJob(nacoscp)
 		}
 	default:
 		panic(myErrors.New(myErrors.CODE_PARAMETER_ERROR, myErrors.MSG_PARAMETER_ERROT, "nacos.Spec.Type", nacos.Spec.Type))
