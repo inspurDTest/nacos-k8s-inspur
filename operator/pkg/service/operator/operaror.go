@@ -58,7 +58,7 @@ func (c *OperatorClient) MakeEnsure(nacos *nacosgroupv1alpha1.Nacos) {
 		}
 		labels[key] = value
 	}
-	nacoscp.Annotations =  labels
+	nacoscp.SetAnnotations(labels)
 
 	switch nacos.Spec.Type {
 	case TYPE_STAND_ALONE:
