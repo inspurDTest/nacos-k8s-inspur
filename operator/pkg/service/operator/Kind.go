@@ -196,7 +196,13 @@ func (e *KindClient) EnsureJob(nacos *nacosgroupv1alpha1.Nacos) {
 // buildSqlConfigMap 创建用于保存待导入的sql的configmap
 func (e *KindClient) buildMysqlConfigMap(nacos *nacosgroupv1alpha1.Nacos) *v1.ConfigMap {
 	labels := e.generateLabels(nacos.Name, NACOS)
-	labels = e.MergeLabels(nacos.Labels, labels)
+	// 合并cr中原有的label,但remove掉 app.kubernetes.io/managed-by=Helm情况
+	for key, value := range nacos.Labels {
+		if key == "app.kubernetes.io/managed-by" && value == "Helm" {
+			continue
+		}
+		labels[key] = value
+	}
 
 	// 创建ConfigMap用于保存sql语句
 	cm := &v1.ConfigMap{
@@ -216,7 +222,13 @@ func (e *KindClient) buildMysqlConfigMap(nacos *nacosgroupv1alpha1.Nacos) *v1.Co
 
 func (e *KindClient) buildJob(nacos *nacosgroupv1alpha1.Nacos) *batchv1.Job {
 	labels := e.generateLabels(nacos.Name, NACOS)
-	labels = e.MergeLabels(nacos.Labels, labels)
+	// 合并cr中原有的label,但remove掉 app.kubernetes.io/managed-by=Helm情况
+	for key, value := range nacos.Labels {
+		if key == "app.kubernetes.io/managed-by" && value == "Helm" {
+			continue
+		}
+		labels[key] = value
+	}
 
 	// 创建Job用于向数据库中导入sql
 	job := &batchv1.Job{
@@ -366,7 +378,13 @@ func readSql(sqlFileName string) string {
 
 func (e *KindClient) buildService(nacos *nacosgroupv1alpha1.Nacos) *v1.Service {
 	labels := e.generateLabels(nacos.Name, NACOS)
-	labels = e.MergeLabels(nacos.Labels, labels)
+	// 合并cr中原有的label,但remove掉 app.kubernetes.io/managed-by=Helm情况
+	for key, value := range nacos.Labels {
+		if key == "app.kubernetes.io/managed-by" && value == "Helm" {
+			continue
+		}
+		labels[key] = value
+	}
 
 	annotations := e.MergeLabels(e.generateAnnoation(), nacos.Annotations)
 
@@ -405,7 +423,13 @@ func (e *KindClient) buildService(nacos *nacosgroupv1alpha1.Nacos) *v1.Service {
 
 func (e *KindClient) buildClientService(nacos *nacosgroupv1alpha1.Nacos) *v1.Service {
 	labels := e.generateLabels(nacos.Name, NACOS)
-	labels = e.MergeLabels(nacos.Labels, labels)
+	// 合并cr中原有的label,但remove掉 app.kubernetes.io/managed-by=Helm情况
+	for key, value := range nacos.Labels {
+		if key == "app.kubernetes.io/managed-by" && value == "Helm" {
+			continue
+		}
+		labels[key] = value
+	}
 
 	annotations := e.MergeLabels(e.generateAnnoation(), nacos.Annotations)
 
@@ -685,7 +709,15 @@ func (e *KindClient) AddCheckDatabase(nacos *nacosgroupv1alpha1.Nacos, sts *appv
 
 func (e *KindClient) buildConfigMap(nacos *nacosgroupv1alpha1.Nacos) *v1.ConfigMap {
 	labels := e.generateLabels(nacos.Name, NACOS)
-	labels = e.MergeLabels(nacos.Labels, labels)
+
+	// 合并cr中原有的label,但remove掉 app.kubernetes.io/managed-by=Helm情况
+	for key, value := range nacos.Labels {
+		if key == "app.kubernetes.io/managed-by" && value == "Helm" {
+			continue
+		}
+		labels[key] = value
+	}
+
 	data := make(map[string]string)
 
 	data["custom.properties"] = nacos.Spec.Config
