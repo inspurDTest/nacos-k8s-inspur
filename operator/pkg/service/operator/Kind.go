@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	batchv1 "k8s.io/api/batch/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
 	"k8s.io/apimachinery/pkg/runtime"
 	"nacos.io/nacos-operator/pkg/util/merge"
 	"path/filepath"
@@ -20,6 +21,7 @@ import (
 	v1 "k8s.io/api/core/v1"
 	nacosgroupv1alpha1 "nacos.io/nacos-operator/api/v1alpha1"
 	"nacos.io/nacos-operator/pkg/service/k8s"
+	corev1 "k8s.io/api/core/v1"
 )
 
 const TYPE_STAND_ALONE = "standalone"
@@ -351,6 +353,15 @@ func (e *KindClient) buildJob(nacos *nacosgroupv1alpha1.Nacos) *batchv1.Job {
 								"/bin/sh",
 								"-c",
 								"mysql -u\"${MYSQL_USER}\" -p\"${MYSQL_PASS}\" -h\"${MYSQL_HOST}\" -P\"${MYSQL_PORT}\" -D\"${MYSQL_DB}\" -e\"${SQL_SCRIPT}\";",
+							},
+							Resources: corev1.ResourceRequirements{
+								Requests: map[corev1.ResourceName]resource.Quantity{
+									corev1.ResourceCPU:    resource.MustParse("1"),
+									corev1.ResourceMemory: resource.MustParse("1Gi"),
+								}, Limits: map[corev1.ResourceName]resource.Quantity{
+									corev1.ResourceCPU:    resource.MustParse("1"),
+									corev1.ResourceMemory: resource.MustParse("1Gi"),
+								},
 							},
 						},
 					},
